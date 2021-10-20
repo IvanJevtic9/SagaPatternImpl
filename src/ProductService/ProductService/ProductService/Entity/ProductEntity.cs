@@ -1,5 +1,5 @@
 ﻿
-namespace OrderService.Entities
+namespace ProductService.Entity
 {
     public class ProductEntity
     {
