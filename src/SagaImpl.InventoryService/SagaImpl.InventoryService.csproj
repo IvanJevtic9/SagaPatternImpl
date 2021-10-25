@@ -1,11 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Database\" />
+    <ProjectReference Include="..\SagaImpl.Common\SagaImpl.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Database\EntityConfiguration\" />
+    <Folder Include="Database\Repository\Interface\" />
   </ItemGroup>
 
 </Project>

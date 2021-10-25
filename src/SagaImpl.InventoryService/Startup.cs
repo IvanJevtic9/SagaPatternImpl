@@ -4,6 +4,14 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using RabbitMQ.Client;
+using SagaImpl.Common;
+using SagaImpl.Common.Abstraction.Interface;
+using SagaImpl.Common.Extension;
+using SagaImpl.Common.RabbitMQ.Abstraction;
+using SagaImpl.Common.Settings;
+using SagaImpl.InventoryService.Extensions;
+using SagaImpl.InventoryService.Messaging.Receiver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,11 +31,18 @@ namespace SagaImpl.InventoryService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRazorPages();
+            services.MapConfigurationSettings(Configuration);
+            //services.AddDatabaseContext<InventoryDbContext>(Configuration.GetSettings<AppSettings>().ConnectionStrings.DefaultConnection);
+            services.RegisterServices(Configuration);
+
+            services.AddRabbitMQConnectionProvider();
+            services.RegisterReceiverBus();
+
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, SwaggerSettings swaggerSettings)
         {
             if (env.IsDevelopment())
             {
@@ -36,20 +51,23 @@ namespace SagaImpl.InventoryService
             else
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint(swaggerSettings.JsonRoute, $"{swaggerSettings.Title} {swaggerSettings.Version}");
+            });
+
             app.UseStaticFiles();
 
             app.UseRouting();
 
-            app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapRazorPages();
+                endpoints.MapControllers();
             });
         }
     }

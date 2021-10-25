@@ -3,10 +3,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using SagaImpl.Common.Apstraction.Interface;
 
 namespace SagaImpl.Common.Abstraction.Interface
 {
-    public interface IRepository<TEntity> where TEntity : class
+    public interface IRepository<TEntity> where TEntity : class, IEntity
     {
         Task<TEntity> GetByIdAsync(int id);
         Task<IEnumerable<TEntity>> GetAllAsync(

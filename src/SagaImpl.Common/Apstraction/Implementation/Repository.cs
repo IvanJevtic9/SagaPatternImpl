@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SagaImpl.Common.Apstraction.Implementation
 {
-    public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
+    public class Repository<TEntity> : IRepository<TEntity> where TEntity : class , IEntity
     {
         internal DbSet<TEntity> dbSet;
 
