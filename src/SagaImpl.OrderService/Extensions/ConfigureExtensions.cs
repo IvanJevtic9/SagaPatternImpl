@@ -8,14 +8,14 @@ namespace SagaImpl.OrderService.Extensions
 {
     public static class ConfigureExtensions
     {
-        public static IServiceCollection RegisterOrderPublishBus(this IServiceCollection services)
+        public static IServiceCollection RegisterOrderRabbitMqChannel(this IServiceCollection services)
         {
-            services.AddTransient(s =>
+            services.AddSingleton(s =>
             {
                 var connectionProvider = s.GetService<IConnectionProvider>();
                 var logger = s.GetService<ILoggerAdapter<OrderPublisher>>();
 
-                return new OrderPublisher(connectionProvider, logger, ExchangeType.Direct);
+                return new OrderPublisher(connectionProvider, logger, ExchangeType.Topic);
             });
 
             return services;

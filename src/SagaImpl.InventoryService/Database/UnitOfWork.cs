@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace SagaImpl.InventoryService.Database
+﻿namespace SagaImpl.InventoryService.Database
 {
     public class UnitOfWork
-    {
-    }
+    { }
 }

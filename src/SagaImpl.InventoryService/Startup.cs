@@ -1,21 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using RabbitMQ.Client;
-using SagaImpl.Common;
-using SagaImpl.Common.Abstraction.Interface;
 using SagaImpl.Common.Extension;
-using SagaImpl.Common.RabbitMQ.Abstraction;
 using SagaImpl.Common.Settings;
 using SagaImpl.InventoryService.Extensions;
-using SagaImpl.InventoryService.Messaging.Receiver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SagaImpl.InventoryService
 {
@@ -36,12 +26,11 @@ namespace SagaImpl.InventoryService
             services.RegisterServices(Configuration);
 
             services.AddRabbitMQConnectionProvider();
-            services.RegisterReceiverBus();
+            services.RegisterInventoryRabbitMqChannel();
 
             services.AddMvc();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, SwaggerSettings swaggerSettings)
         {
             if (env.IsDevelopment())
@@ -61,9 +50,9 @@ namespace SagaImpl.InventoryService
                 c.SwaggerEndpoint(swaggerSettings.JsonRoute, $"{swaggerSettings.Title} {swaggerSettings.Version}");
             });
 
-            app.UseStaticFiles();
-
             app.UseRouting();
+
+            app.UseStaticFiles();
 
             app.UseEndpoints(endpoints =>
             {

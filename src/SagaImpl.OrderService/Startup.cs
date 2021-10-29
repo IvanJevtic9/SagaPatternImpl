@@ -26,7 +26,7 @@ namespace SagaImpl.OrderService
             services.RegisterServices(Configuration);
 
             services.AddRabbitMQConnectionProvider();
-            services.RegisterOrderPublishBus();
+            services.RegisterOrderRabbitMqChannel();
 
             services.AddMvc();
         }

@@ -10,9 +10,7 @@ namespace SagaImpl.Common.Apstraction.Implementation
         private readonly ILogger<T> logger;
 
         public LoggerAdapter()
-        {
-
-        }
+        { }
 
         public LoggerAdapter(ILogger<T> logger)
         {

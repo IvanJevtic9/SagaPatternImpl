@@ -12,7 +12,6 @@ namespace SagaImpl.OrderService.Database
 
         public string GetConnectionString()
         {
-            Console.WriteLine($"{Database.GetDbConnection().ConnectionString}");
             return Database.GetDbConnection().ConnectionString;
         }
 

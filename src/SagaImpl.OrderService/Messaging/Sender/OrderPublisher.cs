@@ -46,15 +46,10 @@ namespace SagaImpl.Common.RabbitMQ.Sender
             GC.SuppressFinalize(this);
         }
 
-        // Protected implementation of Dispose pattern.
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed)
-                return;
-
-            if (disposing)
-                channel?.Close();
-
+            if (disposed) return;
+            if (disposing) channel?.Close();
             disposed = true;
         }
     }

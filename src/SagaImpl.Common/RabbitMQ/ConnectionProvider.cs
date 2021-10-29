@@ -16,11 +16,7 @@ namespace SagaImpl.Common.RabbitMQ
         {
             factory = new ConnectionFactory()
             {
-                Uri = new Uri("amqp://guest:guest@localhost:5672")
-                //HostName = settings.Host,
-                //Port = settings.Port,
-                //UserName = settings.UserName,
-                //Password = settings.Password
+                Uri = new Uri(settings.Uri)
             };
 
             try
@@ -46,12 +42,8 @@ namespace SagaImpl.Common.RabbitMQ
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed)
-                return;
-
-            if (disposing)
-                connection?.Close();
-
+            if (disposed) return;
+            if (disposing) connection?.Close();
             disposed = true;
         }
     }

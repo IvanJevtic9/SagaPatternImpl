@@ -39,15 +39,15 @@ namespace SagaImpl.Common.Extension
                 c.SwaggerDoc(swaggerSettings.Version, new OpenApiInfo { Title = swaggerSettings.Title, Version = swaggerSettings.Version });
             });
 
-            services.AddScoped(typeof(ILoggerAdapter<>), typeof(LoggerAdapter<>));
             services.AddSingleton(swaggerSettings);
-
+            services.AddTransient(typeof(ILoggerAdapter<>), typeof(LoggerAdapter<>));
+            
             return services;
         }
 
         public static IServiceCollection AddRabbitMQConnectionProvider(this IServiceCollection services)
         {
-            return services.AddScoped<IConnectionProvider, ConnectionProvider>();
+            return services.AddTransient<IConnectionProvider, ConnectionProvider>();
         }
 
         public static T GetSettings<T>(this IConfiguration configuration) where T : new()
