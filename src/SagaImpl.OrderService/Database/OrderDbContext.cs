@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SagaImpl.Common.Apstraction.Interface;
 using SagaImpl.OrderService.Database.EntityConfiguration;
-using System;
 
 namespace SagaImpl.OrderService.Database
 {
