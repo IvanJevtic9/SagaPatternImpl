@@ -1,12 +1,9 @@
-﻿using SagaImpl.Common.Abstraction.Interface;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace ELKOMERC.SharedKernel.Abstraction.Interface
 {
-    public interface IUnitOfWork : IDataConnection
+    public interface IUnitOfWork
     {
-        IProcedureCall ProcedureCall { get; }
-
         Task SaveChangesAsync();
     }
 }
