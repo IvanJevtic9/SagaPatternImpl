@@ -17,6 +17,8 @@ namespace SagaImpl.OrderService.Entities
 
         public decimal TotalPrice { get; private set; } = 0;
 
+        public OrderStatus Status { get; set; } = OrderStatus.PENDING;
+
         public void AddItems(List<OrderItemEntity> items)
         {
             foreach (var item in items)

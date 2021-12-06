@@ -23,6 +23,9 @@ namespace SagaImpl.OrderService.Database.EntityConfiguration
 
             builder.Property(o => o.TotalPrice)
                    .IsRequired();
+
+            builder.Property(o => o.Status)
+                .IsRequired();
         }
     }
 }
