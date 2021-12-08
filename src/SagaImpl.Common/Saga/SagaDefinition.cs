@@ -12,6 +12,6 @@ namespace SagaImpl.Common.Saga
 
         public int NumberOfPhases { get; set; }
 
-        public virtual List<SagaSteps> Steps { get; set; }
+        public virtual List<SagaStep> Steps { get; set; }
     }
 }

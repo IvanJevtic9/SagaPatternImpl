@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SagaImpl.Common.Extension;
 using SagaImpl.Common.Settings;
+using SagaImpl.InventoryService.HostingServices;
 using SagaImpl.OrderService.Database;
 using SagaImpl.OrderService.Extensions;
 
@@ -26,7 +27,9 @@ namespace SagaImpl.OrderService
             services.RegisterServices(Configuration);
 
             services.AddRabbitMQConnectionProvider();
-            services.RegisterOrderRabbitMqChannel();
+            services.RegisterOrderRabbitMqChannels();
+
+            services.AddHostedService<SeedDataHostedService>();
 
             services.AddMvc();
         }

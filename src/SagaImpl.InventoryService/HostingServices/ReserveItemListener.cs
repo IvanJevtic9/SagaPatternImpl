@@ -24,16 +24,18 @@ namespace SagaImpl.InventoryService.HostingServices
             logger.LogInformation("Reserve Item hosted service has been started.");
 
             subscriber.SubscribeAsync(Subscribe);
+
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
             logger.LogInformation("Reserve Item hosted has been shut down.");
+
             return Task.CompletedTask;
         }
 
-        private Task<bool> Subscribe(string message, IDictionary<string, object> header)
+        private Task<bool> Subscribe(string message, IDictionary<string, object> messageAttributes)
         {
             // Do subscribe logic (this method will be invoked in consumer) - Odraditi rezervaciju + polsati obavestenje sagi o ishodu operacije.
             Console.WriteLine("Reserving items");

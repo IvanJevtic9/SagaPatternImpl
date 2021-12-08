@@ -2,11 +2,13 @@
 
 namespace SagaImpl.Common.Saga
 {
-    public class SagaSteps : IEntity
+    public class SagaStep : IEntity
     {
         public int Id { get; set; }
 
-        public int SagaDefinitionId { get; set; }
+        public int DefinitionId { get; set; }
+
+        public virtual SagaDefinition Definition { get; set; }
 
         public int Phase { get; set; }
 

@@ -26,7 +26,7 @@ namespace SagaImpl.InventoryService
             services.RegisterServices(Configuration);
 
             services.AddRabbitMQConnectionProvider();
-            services.RegisterInventoryRabbitMqChannel();
+            services.RegisterInventoryRabbitMqChannels();
 
             services.AddMvc();
         }

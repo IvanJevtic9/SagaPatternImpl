@@ -9,7 +9,7 @@ namespace SagaImpl.Common.Saga
 
         public int SessionId { get; set; }
 
-        public int SagaDefinitionId { get; set; }
+        public virtual SagaSession Session { get; set; }
 
         public LogType LogType { get; set; }
 

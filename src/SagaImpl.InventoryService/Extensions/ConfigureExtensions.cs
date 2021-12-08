@@ -10,15 +10,16 @@ namespace SagaImpl.InventoryService.Extensions
 {
     public static class ConfigureExtensions
     {
-        public static IServiceCollection RegisterInventoryRabbitMqChannel(this IServiceCollection services)
+        public static IServiceCollection RegisterInventoryRabbitMqChannels(this IServiceCollection services)
         {
             services.AddSingleton(s =>
             {
                 var connectionProvider = s.GetService<IConnectionProvider>();
                 var logger = s.GetService<ILoggerAdapter<ReserveItemSubscriber>>();
 
-                return new ReserveItemSubscriber(connectionProvider, logger, CommonConstants.RESERVE_ITEMS_EVENT, ExchangeType.Topic);
+                return new ReserveItemSubscriber(connectionProvider, logger, CommonConstants.ORDER_SERVICE_EXCHANGE, CommonConstants.RESERVE_ITEMS_COMMAND, ExchangeType.Topic);
             });
+
             services.AddHostedService<ReserveItemListener>();
 
             return services;

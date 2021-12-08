@@ -14,8 +14,9 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\SagaImpl.Common\SagaImpl.Common.csproj" />
-	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SagaImpl.Common\SagaImpl.Common.csproj" />
+  </ItemGroup>
 
 </Project>

@@ -1,8 +1,8 @@
-﻿using ELKOMERC.SharedKernel.Abstraction.Interface;
-using Microsoft.EntityFrameworkCore.Storage;
+﻿using Microsoft.EntityFrameworkCore.Storage;
 using SagaImpl.OrderService.Database.Repository;
 using SagaImpl.OrderService.Database.Repository.Interface;
 using System.Threading.Tasks;
+using SagaImpl.Common.Abstraction.Interface;
 
 namespace SagaImpl.OrderService.Database
 {
@@ -14,12 +14,24 @@ namespace SagaImpl.OrderService.Database
 
         public IOrderItemRepository OrderItem { get; set; }
 
+        public ISagaDefinitionRepository SagaDefinition { get; set; }
+
+        public ISagaStepRepository SagaStep { get; set; }
+
+        public ISagaSessionRepository SagaSession { get; set; }
+
+        public ISagaLogRepository SagaLog { get; set; }
+
         public UnitOfWork(OrderDbContext db)
         {
             this.db = db;
 
             Order = new OrderRepository(db);
             OrderItem = new OrderItemRepository(db);
+            SagaDefinition = new SagaDefinitionRepository(db);
+            SagaStep = new SagaStepRepository(db);
+            SagaSession = new SagaSessionRepository(db);
+            SagaLog = new SagaLogRepository(db);
         }
 
         public IDbContextTransaction BeginTransaction()

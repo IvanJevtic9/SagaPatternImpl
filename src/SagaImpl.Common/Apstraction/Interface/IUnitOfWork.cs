@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace ELKOMERC.SharedKernel.Abstraction.Interface
+namespace SagaImpl.Common.Abstraction.Interface
 {
     public interface IUnitOfWork
     {

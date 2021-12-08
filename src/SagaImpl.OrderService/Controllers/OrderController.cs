@@ -1,12 +1,7 @@
-﻿using ELKOMERC.SharedKernel.Abstraction.Interface;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SagaImpl.Common;
-using SagaImpl.Common.RabbitMQ.Abstraction;
 using SagaImpl.Common.RabbitMQ.Sender;
-using SagaImpl.OrderService.Database;
-using SagaImpl.OrderService.Entities;
 using SagaImpl.OrderService.Models.Request;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -28,7 +23,7 @@ namespace SagaImpl.OrderService.Controllers
         {
             // request Validation - will not pass through it
 
-            publisher.Publish("Test message", CommonConstants.RESERVE_ITEMS_EVENT, new Dictionary<string, object>());
+            publisher.Publish("Test message", CommonConstants.RESERVE_ITEMS_COMMAND, new Dictionary<string, object>());
 
             return Ok();
         }

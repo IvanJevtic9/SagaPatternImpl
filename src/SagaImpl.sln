@@ -3,13 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaImpl.OrderService", "SagaImpl.OrderService\SagaImpl.OrderService.csproj", "{00E1B6EF-0CB1-43E1-B45B-9FEDBBE50235}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaImpl.OrderService", "SagaImpl.OrderService\SagaImpl.OrderService.csproj", "{00E1B6EF-0CB1-43E1-B45B-9FEDBBE50235}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6DC6DEDE-253C-42C6-AA39-0FD9074658C6} = {6DC6DEDE-253C-42C6-AA39-0FD9074658C6}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaImpl.InventoryService", "SagaImpl.InventoryService\SagaImpl.InventoryService.csproj", "{D53BF239-D653-4900-BDF7-4DF61C46FC7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaImpl.InventoryService", "SagaImpl.InventoryService\SagaImpl.InventoryService.csproj", "{D53BF239-D653-4900-BDF7-4DF61C46FC7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaImpl.PaymentService", "SagaImpl.PaymentService\SagaImpl.PaymentService.csproj", "{E97C06BE-DC75-45B2-919D-32C92A6930CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaImpl.PaymentService", "SagaImpl.PaymentService\SagaImpl.PaymentService.csproj", "{E97C06BE-DC75-45B2-919D-32C92A6930CF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6DC6DEDE-253C-42C6-AA39-0FD9074658C6} = {6DC6DEDE-253C-42C6-AA39-0FD9074658C6}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaImpl.Common", "SagaImpl.Common\SagaImpl.Common.csproj", "{6DC6DEDE-253C-42C6-AA39-0FD9074658C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SagaImpl.Common", "SagaImpl.Common\SagaImpl.Common.csproj", "{6DC6DEDE-253C-42C6-AA39-0FD9074658C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

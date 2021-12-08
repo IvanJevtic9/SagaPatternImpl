@@ -18,6 +18,10 @@ namespace SagaImpl.OrderService.Database
         {
             modelBuilder.ApplyConfiguration(new OrderConfiguration());
             modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
+            modelBuilder.ApplyConfiguration(new SagaDefinitionConfiguiration());
+            modelBuilder.ApplyConfiguration(new SagaStepsConfiguiration());
+            modelBuilder.ApplyConfiguration(new SagaSessionConfiguration());
+            modelBuilder.ApplyConfiguration(new SagaLogConfiguration());
         }
     }
 }

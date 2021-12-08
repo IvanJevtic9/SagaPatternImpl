@@ -2,8 +2,10 @@
 {
     public static class CommonConstants
     {
-        public const string ORDER_SERVICE_EXCHANGE = "Order.Service";
+        public const string ORDER_SERVICE_EXCHANGE = "Order.Exchange";
 
-        public const string RESERVE_ITEMS_EVENT = "Reserve.Items";
+        public const string RESERVE_ITEMS_COMMAND = "Inventory.ReserveItem";
+
+        public const string CREATE_ORDER_ORCHESTRATION = "Orchestration.CreateOrder";
     }
 }

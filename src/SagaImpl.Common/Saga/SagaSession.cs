@@ -10,10 +10,12 @@ namespace SagaImpl.Common.Saga
 
         public int SagaDefinitionId { get; set; }
 
+        public virtual SagaDefinition SagaDefinition { get; set; }
+
         public string Status { get; set; }
 
         public DateTimeOffset TimeCreated { get; } = DateTimeOffset.UtcNow;
 
-        public virtual List<SagaLog> SagaLogs { get; set; }
+        public virtual List<SagaLog> Logs { get; set; }
     }
 }

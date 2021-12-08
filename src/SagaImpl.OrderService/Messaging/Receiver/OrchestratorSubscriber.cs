@@ -2,13 +2,13 @@
 using SagaImpl.Common.RabbitMQ;
 using SagaImpl.Common.RabbitMQ.Abstraction;
 
-namespace SagaImpl.InventoryService.Messaging.Receiver
+namespace SagaImpl.OrderService.Messaging.Receiver
 {
-    public class ReserveItemSubscriber : Subscriber<ReserveItemSubscriber>
+    public class OrchestratorSubscriber : Subscriber<OrchestratorSubscriber>
     {
-        public ReserveItemSubscriber(
+        public OrchestratorSubscriber(
             IConnectionProvider connectionProvider,
-            ILoggerAdapter<ReserveItemSubscriber> logger,
+            ILoggerAdapter<OrchestratorSubscriber> logger,
             string exchangeName,
             string queueName,
             string exchangeType,
