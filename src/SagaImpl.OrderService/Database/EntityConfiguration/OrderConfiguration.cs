@@ -24,8 +24,28 @@ namespace SagaImpl.OrderService.Database.EntityConfiguration
             builder.Property(o => o.TotalPrice)
                    .IsRequired();
 
-            builder.Property(o => o.Status)
-                .IsRequired();
+            builder.HasOne(a => a.Status)
+                   .WithMany()
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .HasForeignKey(a => a.StatusId)
+                   .IsRequired();
+        }
+    }
+
+    public class OrderStatusConfiguration : IEntityTypeConfiguration<OrderStatus>
+    {
+        public void Configure(EntityTypeBuilder<OrderStatus> builder)
+        {
+            builder.ToTable("OrderStatuses", Consents.SchemaNames.ORDER_SCHEMA);
+
+            builder.HasKey(a => a.Id);
+
+            builder.Property(a => a.Id)
+                   .ValueGeneratedNever();
+
+            builder.Property(a => a.Name)
+                   .HasMaxLength(20)
+                   .IsRequired();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using SagaImpl.Common.Abstraction.Interface;
+using SagaImpl.Common.Extension;
 using SagaImpl.Common.RabbitMQ.Abstraction;
 using System;
 using System.Collections.Generic;
@@ -53,7 +54,7 @@ namespace SagaImpl.Common.RabbitMQ
             consumer.Received += async (sender, e) =>
             {
                 var body = e.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
+                var message = body.GetString();
 
                 bool success = await callback.Invoke(message, e.BasicProperties.Headers);
 

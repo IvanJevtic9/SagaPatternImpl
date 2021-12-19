@@ -25,5 +25,6 @@ namespace SagaImpl.Common.Abstraction.Interface
         Task RemoveAsync(int id);
         Task RemoveAsync(TEntity entity);
         Task RemoveRangeAsync(IEnumerable<TEntity> entities);
+        void Attach(TEntity entity);
     }
 }

@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace SagaImpl.Common.ModelDtos
+﻿namespace SagaImpl.Common.ModelDtos
 {
-    public record ReserveOrderItems(int OrderId, List<OrderItemDto> Items);
+    public class OrderDto
+    {
+        public int Id { get; set; }
+    }
 }

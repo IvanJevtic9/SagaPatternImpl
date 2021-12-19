@@ -4,51 +4,19 @@ using SagaImpl.Common.Saga;
 
 namespace SagaImpl.OrderService.Database.EntityConfiguration
 {
-    public class SagaDefinitionConfiguiration : IEntityTypeConfiguration<SagaDefinition>
+    public class LogTypeConfiguration : IEntityTypeConfiguration<LogType>
     {
-        public void Configure(EntityTypeBuilder<SagaDefinition> builder)
+        public void Configure(EntityTypeBuilder<LogType> builder)
         {
-            builder.ToTable("Definitions", Consents.SchemaNames.SAGA_SCHEMA);
+            builder.ToTable("LogTypes", Consents.SchemaNames.SAGA_SCHEMA);
 
             builder.HasKey(a => a.Id);
 
             builder.Property(a => a.Id)
-                   .ValueGeneratedOnAdd();
+                   .ValueGeneratedNever();
 
             builder.Property(a => a.Name)
-                   .IsRequired()
-                   .HasMaxLength(254);
-
-            builder.Property(a => a.NumberOfPhases)
-                   .IsRequired();
-        }
-    }
-
-    public class SagaStepsConfiguiration : IEntityTypeConfiguration<SagaStep>
-    {
-        public void Configure(EntityTypeBuilder<SagaStep> builder)
-        {
-            builder.ToTable("Steps", Consents.SchemaNames.SAGA_SCHEMA);
-
-            builder.HasKey(a => a.Id);
-
-            builder.Property(a => a.Id)
-                   .ValueGeneratedOnAdd();
-
-            builder.Property(a => a.Phase)
-                   .IsRequired();
-
-            builder.Property(a => a.TransactionMethod)
-                   .IsRequired()
-                   .HasMaxLength(255);
-
-            builder.Property(a => a.CompensationMethod)
-                   .HasMaxLength(255);
-
-            builder.HasOne(a => a.Definition)
-                   .WithMany(a => a.Steps)
-                   .OnDelete(DeleteBehavior.Cascade)
-                   .HasForeignKey(a => a.DefinitionId)
+                   .HasMaxLength(20)
                    .IsRequired();
         }
     }
@@ -69,12 +37,6 @@ namespace SagaImpl.OrderService.Database.EntityConfiguration
 
             builder.Property(a => a.TimeCreated)
                    .IsRequired();
-
-            builder.HasOne(a => a.SagaDefinition)
-                   .WithMany()
-                   .OnDelete(DeleteBehavior.Cascade)
-                   .HasForeignKey(a => a.SagaDefinitionId)
-                   .IsRequired();
         }
     }
 
@@ -89,10 +51,17 @@ namespace SagaImpl.OrderService.Database.EntityConfiguration
             builder.Property(a => a.Id)
                    .ValueGeneratedOnAdd();
 
-            builder.Property(a => a.LogType)
+            builder.Property(a => a.Name)
+                   .HasMaxLength(50)
                    .IsRequired();
 
             builder.Property(a => a.LogTime)
+                   .IsRequired();
+
+            builder.HasOne(a => a.LogType)
+                   .WithMany()
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .HasForeignKey(a => a.LogTypeId)
                    .IsRequired();
 
             builder.HasOne(a => a.Session)

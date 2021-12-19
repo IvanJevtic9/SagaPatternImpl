@@ -1,10 +1,11 @@
-﻿namespace SagaImpl.Common.Saga
+﻿using SagaImpl.Common.Apstraction.Interface;
+
+namespace SagaImpl.Common.Saga
 {
-    public enum LogType : byte
+    public class LogType : IEntity
     {
-        Start,
-        End,
-        Abort,
-        Compesation
+        public int Id { get; set; }
+
+        public string Name { get; set; }
     }
 }

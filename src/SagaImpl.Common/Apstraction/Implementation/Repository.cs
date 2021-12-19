@@ -33,6 +33,11 @@ namespace SagaImpl.Common.Apstraction.Implementation
             return await dbSet.AnyAsync(predicate);
         }
 
+        public void Attach(TEntity entity)
+        {
+            dbSet.Attach(entity);
+        }
+
         public async Task<IEnumerable<TEntity>> GetAllAsync(
             Expression<Func<TEntity, bool>> predicate = null,
             Func<IQueryable<TEntity>,

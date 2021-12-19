@@ -10,8 +10,8 @@ using SagaImpl.OrderService.Database;
 namespace SagaImpl.OrderService.Migrations
 {
     [DbContext(typeof(OrderDbContext))]
-    [Migration("20211208145005_AddedSagaTables")]
-    partial class AddedSagaTables
+    [Migration("20211211145751_InitMigration")]
+    partial class InitMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,24 +21,19 @@ namespace SagaImpl.OrderService.Migrations
                 .HasAnnotation("ProductVersion", "5.0.11")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("SagaImpl.Common.Saga.SagaDefinition", b =>
+            modelBuilder.Entity("SagaImpl.Common.Saga.LogType", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(254)
-                        .HasColumnType("nvarchar(254)");
-
-                    b.Property<int>("NumberOfPhases")
-                        .HasColumnType("int");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Definitions", "Saga");
+                    b.ToTable("LogTypes", "Saga");
                 });
 
             modelBuilder.Entity("SagaImpl.Common.Saga.SagaLog", b =>
@@ -54,13 +49,20 @@ namespace SagaImpl.OrderService.Migrations
                     b.Property<DateTimeOffset>("LogTime")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<byte>("LogType")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("LogTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("SessionId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LogTypeId");
 
                     b.HasIndex("SessionId");
 
@@ -74,9 +76,6 @@ namespace SagaImpl.OrderService.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("SagaDefinitionId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Status")
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
@@ -86,38 +85,7 @@ namespace SagaImpl.OrderService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SagaDefinitionId");
-
                     b.ToTable("Sessions", "Saga");
-                });
-
-            modelBuilder.Entity("SagaImpl.Common.Saga.SagaSteps", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("CompensationMethod")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("DefinitionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Phase")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TransactionMethod")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DefinitionId");
-
-                    b.ToTable("Steps", "Saga");
                 });
 
             modelBuilder.Entity("SagaImpl.OrderService.Entities.OrderEntity", b =>
@@ -130,7 +98,10 @@ namespace SagaImpl.OrderService.Migrations
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<int>("Status")
+                    b.Property<string>("Currency")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StatusId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
@@ -140,6 +111,8 @@ namespace SagaImpl.OrderService.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StatusId");
 
                     b.ToTable("Orders", "OrderService");
                 });
@@ -170,37 +143,49 @@ namespace SagaImpl.OrderService.Migrations
                     b.ToTable("OrderItems", "OrderService");
                 });
 
+            modelBuilder.Entity("SagaImpl.OrderService.Entities.OrderStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OrderStatuses", "OrderService");
+                });
+
             modelBuilder.Entity("SagaImpl.Common.Saga.SagaLog", b =>
                 {
+                    b.HasOne("SagaImpl.Common.Saga.LogType", "LogType")
+                        .WithMany()
+                        .HasForeignKey("LogTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SagaImpl.Common.Saga.SagaSession", "Session")
                         .WithMany("Logs")
                         .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("LogType");
+
                     b.Navigation("Session");
                 });
 
-            modelBuilder.Entity("SagaImpl.Common.Saga.SagaSession", b =>
+            modelBuilder.Entity("SagaImpl.OrderService.Entities.OrderEntity", b =>
                 {
-                    b.HasOne("SagaImpl.Common.Saga.SagaDefinition", "SagaDefinition")
+                    b.HasOne("SagaImpl.OrderService.Entities.OrderStatus", "Status")
                         .WithMany()
-                        .HasForeignKey("SagaDefinitionId")
+                        .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("SagaDefinition");
-                });
-
-            modelBuilder.Entity("SagaImpl.Common.Saga.SagaSteps", b =>
-                {
-                    b.HasOne("SagaImpl.Common.Saga.SagaDefinition", "Definition")
-                        .WithMany("Steps")
-                        .HasForeignKey("DefinitionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Definition");
+                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("SagaImpl.OrderService.Entities.OrderItemEntity", b =>
@@ -212,11 +197,6 @@ namespace SagaImpl.OrderService.Migrations
                         .IsRequired();
 
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("SagaImpl.Common.Saga.SagaDefinition", b =>
-                {
-                    b.Navigation("Steps");
                 });
 
             modelBuilder.Entity("SagaImpl.Common.Saga.SagaSession", b =>

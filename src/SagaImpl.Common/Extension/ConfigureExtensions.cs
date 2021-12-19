@@ -1,12 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation.AspNetCore;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using SagaImpl.Common.Abstraction.Interface;
 using SagaImpl.Common.Apstraction.Implementation;
+using SagaImpl.Common.MediatR;
 using SagaImpl.Common.RabbitMQ;
 using SagaImpl.Common.RabbitMQ.Abstraction;
 using SagaImpl.Common.Settings;
+using System;
 
 namespace SagaImpl.Common.Extension
 {
@@ -14,8 +18,7 @@ namespace SagaImpl.Common.Extension
     {
         public static IServiceCollection AddDatabaseContext<TContext>(this IServiceCollection services, string connectionString) where TContext : DbContext
         {
-            return services.AddDbContext<TContext>(b => b.UseSqlServer(connectionString)
-                                                         .UseLazyLoadingProxies());
+            return services.AddDbContext<TContext>(b => b.UseSqlServer(connectionString).UseLazyLoadingProxies(), ServiceLifetime.Transient);
         }
 
         public static IServiceCollection MapConfigurationSettings(this IServiceCollection services, IConfiguration configuration)
@@ -26,6 +29,15 @@ namespace SagaImpl.Common.Extension
             services.AddOptions();
             services.AddSingleton(appSettings);
             services.AddSingleton(rabbitMqSettings);
+
+            return services;
+        }
+
+        public static IServiceCollection AddMediatrConfiguration(this IServiceCollection services, Type type)
+        {
+            services.AddMediatR(type);
+            services.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining(typeof(ConfigurationExtensions)));
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             return services;
         }
@@ -41,7 +53,7 @@ namespace SagaImpl.Common.Extension
 
             services.AddSingleton(swaggerSettings);
             services.AddTransient(typeof(ILoggerAdapter<>), typeof(LoggerAdapter<>));
-            
+
             return services;
         }
 

@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SagaImpl.Common.Apstraction.Interface;
+using SagaImpl.InventoryService.Database.EntityConfiguration;
 
 namespace SagaImpl.InventoryService.Database
 {
-    internal class InventoryDbContext : DbContext, IDbContext
+    public class InventoryDbContext : DbContext, IDbContext
     {
         public InventoryDbContext(DbContextOptions options) : base(options)
         { }
@@ -15,7 +16,7 @@ namespace SagaImpl.InventoryService.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.ApplyConfiguration(new OrderConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductConfiguration());
         }
     }
 }

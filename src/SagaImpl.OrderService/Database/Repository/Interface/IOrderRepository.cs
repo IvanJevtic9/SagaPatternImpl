@@ -3,6 +3,9 @@ using SagaImpl.OrderService.Entities;
 
 namespace SagaImpl.OrderService.Database.Repository.Interface
 {
+    public interface IOrderStausRepository : IRepository<OrderStatus>
+    { }
+
     public interface IOrderRepository : IRepository<OrderEntity>
     { }
 

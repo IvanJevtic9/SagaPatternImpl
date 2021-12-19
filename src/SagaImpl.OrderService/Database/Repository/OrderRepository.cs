@@ -4,6 +4,12 @@ using SagaImpl.OrderService.Entities;
 
 namespace SagaImpl.OrderService.Database.Repository
 {
+    public class OrderStatusRepository : Repository<OrderStatus>, IOrderStausRepository
+    {
+        public OrderStatusRepository(OrderDbContext db) : base(db)
+        { }
+    }
+
     public class OrderRepository : Repository<OrderEntity>, IOrderRepository
     {
         public OrderRepository(OrderDbContext db) : base(db)

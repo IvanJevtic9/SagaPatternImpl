@@ -6,12 +6,10 @@ namespace SagaImpl.Common.Saga.Abstaction
 {
     public interface IOrchestration
     {
-        public bool IsAlive { get; }
+        bool IsAlive { get; }
 
-        public Task StartAsync();
+        Task StartAsync(object input);
 
-        public Task ContinueAsync();
-
-        public void OnMessageReceive(string message, IDictionary<string, object> messageAttributes);
+        Task<bool> OnMessageReceive(string message, IDictionary<string, object> messageAttributes);
     }
 }

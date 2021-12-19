@@ -11,18 +11,23 @@ namespace SagaImpl.OrderService.Entities
 
         public int UserId { get; set; }
 
-        public DateTimeOffset CreatedDate { get; set; }
+        public DateTimeOffset CreatedDate { get; } = DateTimeOffset.UtcNow;
 
-        public virtual List<OrderItemEntity> OrderItems { get; private set; }
+        public virtual List<OrderItemEntity> OrderItems { get; private set; } = new List<OrderItemEntity>();
+
+        public string Currency { get; set; }
 
         public decimal TotalPrice { get; private set; } = 0;
 
-        public OrderStatus Status { get; set; } = OrderStatus.PENDING;
+        public int StatusId { get; set; } = 1;
+
+        public virtual OrderStatus Status { get; }
 
         public void AddItems(List<OrderItemEntity> items)
         {
             foreach (var item in items)
             {
+                item.Order = this;
                 TotalPrice += item.GetTotalPrice();
             }
 

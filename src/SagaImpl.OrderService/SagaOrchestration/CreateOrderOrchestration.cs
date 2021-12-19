@@ -1,83 +1,196 @@
-﻿using SagaImpl.Common.Messaging;
+﻿using System.Text.Json;
+using SagaImpl.Common;
 using SagaImpl.Common.RabbitMQ.Sender;
 using SagaImpl.Common.Saga;
 using SagaImpl.Common.Saga.Abstaction;
 using SagaImpl.OrderService.Database;
 using SagaImpl.OrderService.Entities;
-using System.Collections.Concurrent;
+using SagaImpl.OrderService.Models.Request;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SagaImpl.Common.Saga.Enums;
+using SagaImpl.Common.ModelDtos;
+using AutoMapper;
+using System.Text;
+using SagaImpl.Common.Extension;
+using SagaImpl.OrderService.Messaging.Receiver;
+using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
+using System;
+using RabbitMQ.Client.Events;
 
 namespace SagaImpl.OrderService.SagaOrchestration
 {
-    public enum CreateOrderSagaCommand : byte
-    {
-        CreateOrder,
-        RejectOrder,
-        ReserveItems,
-        UnreserveItems,
-        PayOrder,
-        RefundMoney,
-        FinishSaga
-    }
-
-    public enum CreateOrderSagaEvent : byte
-    {
-
-    }
-
     public class CreateOrderOrchestration : IOrchestration
     {
-        private readonly UnitOfWork unitOfWork;
-        
-        private OrderEntity order;
+        private UnitOfWork unitOfWork;
         private readonly OrderPublisher publisher;
+        private readonly OrchestratorSubscriber subscriber;
+        private readonly IServiceScopeFactory serviceScopeFactory;
+        private readonly IMapper mapper;
 
+        private OrderEntity order;
         private SagaSession session;
-        private readonly SagaDefinition definition;
-
-        private ConcurrentBag<CreateOrderSagaEvent> eventQueue = new ConcurrentBag<CreateOrderSagaEvent>();
 
         public bool IsAlive { get; private set; } = false;
 
-        public CreateOrderOrchestration(UnitOfWork unitOfWork, OrderPublisher publisher)
+        public CreateOrderOrchestration(UnitOfWork unitOfWork, OrderPublisher publisher, IMapper mapper, IServiceScopeFactory serviceScopeFactory, OrchestratorSubscriber subscriber)
         {
             this.unitOfWork = unitOfWork;
             this.publisher = publisher;
+            this.mapper = mapper;
+            this.serviceScopeFactory = serviceScopeFactory;
+            this.subscriber = subscriber;
 
-            definition = loadDefinition(Consents.OrchestrationNames.CREATE_ORDER);
+            subscriber.SubscribeAsync(OnMessageReceive);
         }
 
-        public async Task StartAsync()
+        public async Task StartAsync(object input)
         {
-            session = new SagaSession
+            if (!IsAlive)
             {
-                SagaDefinitionId = definition.Id,
-                SagaDefinition = definition,
-                //Status = 
-                Logs = new List<SagaLog>()
-            };
+                IsAlive = true;
 
-            //this.order = new OrderEntity()
-            //{
-            //    UserId = userId,
-            //    CreatedDate = DateTimeOffset.Now
-            //};
+                var req = (CreateOrderRequest)input;
+
+                session = new SagaSession
+                {
+                    Status = SagaStatus.Running.ToString(),
+                    Logs = new List<SagaLog>()
+                };
+
+                session.Logs.Add(new SagaLog
+                {
+                    Session = session,
+                    Name = CreateOrderSagaEvents.StartSaga.ToString(),
+                    LogTypeId = (int)LType.Start
+                });
+
+                session.Logs.Add(new SagaLog
+                {
+                    Session = session,
+                    Name = CreateOrderSagaEvents.CreateOrder.ToString(),
+                    LogTypeId = (int)LType.Start,
+                    Log = JsonSerializer.Serialize(req)
+                });
+
+                order = new OrderEntity
+                {
+                    UserId = req.UserId
+                };
+
+                await unitOfWork.Order.AddAsync(order);
+                await unitOfWork.SaveChangesAsync();
+
+                session.Logs.Add(new SagaLog
+                {
+                    Session = session,
+                    Name = CreateOrderSagaEvents.CreateOrder.ToString(),
+                    LogTypeId = (int)LType.End,
+                    Log = JsonSerializer.Serialize(new { order.Id })
+                });
+
+                await unitOfWork.SagaSession.AddAsync(session);
+                await unitOfWork.SaveChangesAsync();
+
+                var items = JsonSerializer.Serialize(req.Items);
+                var reserveItems = new Dictionary<string, object>
+                {
+                    { "commandName", (byte)CreateOrderSagaCommand.ReserveItems},
+                    { "sessionId", session.Id },
+                    { "orderList", items }
+                };
+
+                publisher.Publish($"Reserve items for order. Order id: {order.Id}", CommonConstants.RESERVE_ITEMS_COMMAND, reserveItems);
+
+                session.Logs.Add(new SagaLog
+                {
+                    Session = session,
+                    Name = CreateOrderSagaEvents.ReserveItems.ToString(),
+                    LogTypeId = (int)LType.Start,
+                    Log = items
+                });
+                await unitOfWork.SaveChangesAsync();
+            }
         }
 
-        public async Task ContinueAsync()
+        public async Task<bool> OnMessageReceive(string message, IDictionary<string, object> messageAttributes)
         {
+            var scope = serviceScopeFactory.CreateScope();
+            unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+            unitOfWork.Order.Attach(order);
+            unitOfWork.SagaSession.Attach(session);
 
-        }
+            var sessionId = (int)messageAttributes["sessionId"];
+            if (sessionId != session.Id) return false;
 
-        public void OnMessageReceive(string message, IDictionary<string, object> messageAttributes)
-        {
-            throw new System.NotImplementedException();
-        }
+            if (messageAttributes.ContainsKey("eventName"))
+            {
+                CreateOrderSagaEvents nEvent = (CreateOrderSagaEvents)messageAttributes["eventName"];
+                LType type = (LType)messageAttributes["eventType"];
 
-        private SagaDefinition loadDefinition(string name)
-        {
-            return unitOfWork.SagaDefinition.GetFirstOrDefaultAsync(a => a.Name == name).Result;
+                switch (nEvent)
+                {
+                    // Refactor - use MediatR for handling flow
+                    case CreateOrderSagaEvents.ReserveItems:
+                        switch (type)
+                        {
+                            case LType.End:
+                                var response = ((byte[])messageAttributes["body"]).GetString();
+
+                                session.Logs.Add(new SagaLog
+                                {
+                                    Session = session,
+                                    Name = CreateOrderSagaEvents.ReserveItems.ToString(),
+                                    LogTypeId = (int)type,
+                                    Log = response
+                                });
+
+                                var body = JsonSerializer.Deserialize<List<ReservedItemsDto>>(response);
+                                var orderItems = mapper.Map<List<OrderItemEntity>>(body);
+
+                                order.AddItems(orderItems);
+
+                                await unitOfWork.SaveChangesAsync();
+
+                                //Sent Payment Command
+                                break;
+                            case LType.Abort:
+                                session.Logs.Add(new SagaLog
+                                {
+                                    Session = session,
+                                    Name = CreateOrderSagaEvents.ReserveItems.ToString(),
+                                    LogTypeId = (int)type,
+                                    Log = JsonSerializer.Serialize(new { message })
+                                });
+
+                                session.Logs.Add(new SagaLog
+                                {
+                                    Session = session,
+                                    Name = CreateOrderSagaEvents.CreateOrder.ToString(),
+                                    LogTypeId = (int)LType.Compesation,
+                                    Log = JsonSerializer.Serialize(new { order.Id })
+                                });
+
+                                session.Logs.Add(new SagaLog
+                                {
+                                    Session = session,
+                                    Name = CreateOrderSagaEvents.StartSaga.ToString(),
+                                    LogTypeId = (int)LType.End
+                                });
+
+
+                                order.StatusId = (int)OrderStatusType.REJECTED;
+                                await unitOfWork.SaveChangesAsync();
+
+                                break;
+                        }
+                        break;
+                        // Handle Payment request
+                }
+            }
+
+            return true;
         }
     }
 }

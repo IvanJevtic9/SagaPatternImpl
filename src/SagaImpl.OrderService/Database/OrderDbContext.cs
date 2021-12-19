@@ -16,12 +16,12 @@ namespace SagaImpl.OrderService.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.ApplyConfiguration(new OrderStatusConfiguration());
             modelBuilder.ApplyConfiguration(new OrderConfiguration());
             modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
-            modelBuilder.ApplyConfiguration(new SagaDefinitionConfiguiration());
-            modelBuilder.ApplyConfiguration(new SagaStepsConfiguiration());
             modelBuilder.ApplyConfiguration(new SagaSessionConfiguration());
             modelBuilder.ApplyConfiguration(new SagaLogConfiguration());
+            modelBuilder.ApplyConfiguration(new LogTypeConfiguration());
         }
     }
 }

@@ -4,10 +4,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SagaImpl.Common.Extension;
+using SagaImpl.Common.Middelware;
 using SagaImpl.Common.Settings;
-using SagaImpl.InventoryService.HostingServices;
 using SagaImpl.OrderService.Database;
 using SagaImpl.OrderService.Extensions;
+using SagaImpl.OrderService.HostedServices;
 
 namespace SagaImpl.OrderService
 {
@@ -25,9 +26,10 @@ namespace SagaImpl.OrderService
             services.MapConfigurationSettings(Configuration);
             services.AddDatabaseContext<OrderDbContext>(Configuration.GetSettings<AppSettings>().ConnectionStrings.DefaultConnection);
             services.RegisterServices(Configuration);
-
+            services.AddMediatrConfiguration(typeof(UnitOfWork));
             services.AddRabbitMQConnectionProvider();
             services.RegisterOrderRabbitMqChannels();
+            services.RegisterMicroServiceServices();
 
             services.AddHostedService<SeedDataHostedService>();
 
@@ -40,11 +42,8 @@ namespace SagaImpl.OrderService
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                app.UseHsts();
-            }
+
+            app.UseMiddleware<ExceptionMiddelware>();
 
             app.UseSwagger();
 

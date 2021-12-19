@@ -4,7 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SagaImpl.Common.Extension;
+using SagaImpl.Common.Middelware;
 using SagaImpl.Common.Settings;
+using SagaImpl.InventoryService.Database;
 using SagaImpl.InventoryService.Extensions;
 
 namespace SagaImpl.InventoryService
@@ -18,13 +20,14 @@ namespace SagaImpl.InventoryService
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.MapConfigurationSettings(Configuration);
-            //services.AddDatabaseContext<InventoryDbContext>(Configuration.GetSettings<AppSettings>().ConnectionStrings.DefaultConnection);
+            services.AddDatabaseContext<InventoryDbContext>(Configuration.GetSettings<AppSettings>().ConnectionStrings.DefaultConnection);
             services.RegisterServices(Configuration);
+            services.RegisterMicroServiceServices();
 
+            services.AddMediatrConfiguration(typeof(UnitOfWork));
             services.AddRabbitMQConnectionProvider();
             services.RegisterInventoryRabbitMqChannels();
 
@@ -37,11 +40,8 @@ namespace SagaImpl.InventoryService
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                app.UseHsts();
-            }
+
+            app.UseMiddleware<ExceptionMiddelware>();
 
             app.UseSwagger();
 
