@@ -15,9 +15,9 @@ using System.Text;
 using SagaImpl.Common.Extension;
 using SagaImpl.OrderService.Messaging.Receiver;
 using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
-using System;
 using RabbitMQ.Client.Events;
+using System;
+using SagaImpl.OrderService.Models;
 
 namespace SagaImpl.OrderService.SagaOrchestration
 {
@@ -34,6 +34,10 @@ namespace SagaImpl.OrderService.SagaOrchestration
 
         public bool IsAlive { get; private set; } = false;
 
+        public EventHandler<OrchestrationEventArgs> AcknowladgeReceivedMessage;
+
+        public EventHandler<BasicDeliverEventArgs> Handler;
+
         public CreateOrderOrchestration(UnitOfWork unitOfWork, OrderPublisher publisher, IMapper mapper, IServiceScopeFactory serviceScopeFactory, OrchestratorSubscriber subscriber)
         {
             this.unitOfWork = unitOfWork;
@@ -42,7 +46,9 @@ namespace SagaImpl.OrderService.SagaOrchestration
             this.serviceScopeFactory = serviceScopeFactory;
             this.subscriber = subscriber;
 
-            subscriber.SubscribeAsync(OnMessageReceive);
+            Handler = new EventHandler<BasicDeliverEventArgs>(onMessageReceived);
+
+            subscriber.SubscribeOnChannel(Handler, this);
         }
 
         public async Task StartAsync(object input)
@@ -114,7 +120,7 @@ namespace SagaImpl.OrderService.SagaOrchestration
             }
         }
 
-        public async Task<bool> OnMessageReceive(string message, IDictionary<string, object> messageAttributes)
+        public async Task<bool> HandleMessage(string message, IDictionary<string, object> messageAttributes)
         {
             var scope = serviceScopeFactory.CreateScope();
             unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
@@ -179,8 +185,10 @@ namespace SagaImpl.OrderService.SagaOrchestration
                                     LogTypeId = (int)LType.End
                                 });
 
-
                                 order.StatusId = (int)OrderStatusType.REJECTED;
+                                session.Status = SagaStatus.Finished.ToString();
+
+                                subscriber.UnsubscribeFromChannel(Handler);
                                 await unitOfWork.SaveChangesAsync();
 
                                 break;
@@ -191,6 +199,23 @@ namespace SagaImpl.OrderService.SagaOrchestration
             }
 
             return true;
+        }
+
+        
+
+        private async void onMessageReceived(object sender, BasicDeliverEventArgs e)
+        {
+            var body = e.Body.ToArray();
+            var message = body.GetString();
+
+            bool success = await HandleMessage(message, e.BasicProperties.Headers);
+
+            if (success) onAcknowladgeReceivedMessage(e.DeliveryTag);
+        }
+
+        private void onAcknowladgeReceivedMessage(ulong deliveryTag)
+        {
+            if (AcknowladgeReceivedMessage != null) AcknowladgeReceivedMessage(this, new OrchestrationEventArgs { DeliveryTag = deliveryTag });
         }
     }
 }

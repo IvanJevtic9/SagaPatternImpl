@@ -1,18 +1,18 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using SagaImpl.Common.Abstraction.Interface;
-using SagaImpl.Common.Extension;
 using SagaImpl.Common.RabbitMQ;
 using SagaImpl.Common.RabbitMQ.Abstraction;
+using SagaImpl.OrderService.Models;
+using SagaImpl.OrderService.SagaOrchestration;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace SagaImpl.OrderService.Messaging.Receiver
 {
     public class OrchestratorSubscriber : Subscriber<OrchestratorSubscriber>
     {
         private readonly EventingBasicConsumer consumer;
+        
         public OrchestratorSubscriber(
             IConnectionProvider connectionProvider,
             ILoggerAdapter<OrchestratorSubscriber> logger,
@@ -26,19 +26,21 @@ namespace SagaImpl.OrderService.Messaging.Receiver
             channel.BasicConsume(queueName, false, consumer);
         }
 
-        public override void SubscribeAsync(Func<string, IDictionary<string, object>, Task<bool>> callback)
+        public void SubscribeOnChannel(EventHandler<BasicDeliverEventArgs> action, CreateOrderOrchestration orchestrator)
         {
-            consumer.Received += async (sender, e) =>
-            {
-                var body = e.Body.ToArray();
-                var message = body.GetString();
+            consumer.Received += action;
+            orchestrator.AcknowladgeReceivedMessage += onAcknowladgeReceivedMessage;
+        }
 
-                bool success = await callback.Invoke(message, e.BasicProperties.Headers);
+        public void UnsubscribeFromChannel(EventHandler<BasicDeliverEventArgs> action)
+        {
+            consumer.Received -= action;
+        }
 
-                logger.LogInformation($"Exchange: {exchangeName} received rbmq message. Routing key: {queueName}");
-
-                if (success) channel.BasicAck(e.DeliveryTag, false);
-            };
+        private void onAcknowladgeReceivedMessage(object sender, OrchestrationEventArgs args)
+        {
+            logger.LogInformation($"Exchange: {exchangeName} received rbmq message. Routing key: {queueName}");
+            channel.BasicAck(args.DeliveryTag, false);
         }
     }
 }

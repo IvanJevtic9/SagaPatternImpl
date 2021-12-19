@@ -36,11 +36,13 @@ namespace SagaImpl.InventoryService.MediatR.Handlers
 
                 if (product == null || product.Quantity < item.NumberOf)
                 {
+                    semaphore.Release();
                     int qunt = product == null ? 0 : product.Quantity;
 
                     res.Items.Clear();
                     res.IsSuccess = false;
                     res.Message = $"Invalid reservation for item id: {item.ItemId}, number of: {item.NumberOf} (Available - {qunt})";
+                    
                     return res;
                 }
 
